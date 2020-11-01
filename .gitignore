@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+daily_summary_20201030_v2.csv
+merged_daily_normals_tavg.csv
+nasa_monthly.csv
