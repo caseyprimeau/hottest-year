@@ -94,10 +94,6 @@ def main():
     ###********************* dash ***************************************
     app = dash.Dash(__name__)
     
-    tabs_style = {
-    'align-items':'left'
-}
-
     app.layout = html.Div(children=[
         html.H1('Will this be the hottest year on record?'),
         html.Div([
@@ -109,7 +105,7 @@ def main():
                 columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
                 data=nosmooth_landocean.to_dict('records'),
                 style_as_list_view=False
-                )],style=tabs_style, className="twelve columns")
+                )],className="eight columns")
         ], className="row"),
         html.Br(),
         html.Div(
@@ -126,7 +122,7 @@ def main():
 
 
 
-    app.run_server(debug=True, threaded=True)    
+    app.run_server(debug=False, threaded=False)    
 
 if __name__ == "__main__":
     main()
