@@ -7,8 +7,8 @@ https://www.predictit.org/markets/detail/6234/
 Official yearly measurement: 
 https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt
 
-
 """
+
 import pdb
 import datetime
 from datetime import date
@@ -67,15 +67,14 @@ def seasonal_anomaly_fig(full_anomaly):
     seasonal_anomaly = full_anomaly
     seasonal_anomaly.drop(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec', 'J-D','D-N'], axis=1)
 
-
     seasonal_anomaly.set_index('Year', inplace=True)
-    season_list = ['','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    season_list = ['']
     colors = px.colors.qualitative.Plotly
-    monthly_anomaly_fig = go.Figure()
+    seasonal_anomaly_fig = go.Figure()
     
-    for i in range(0, len(monthly_anomaly)):
-        line_name = monthly_anomaly.iloc[i].name
-        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=str(line_name)))
+    for i in range(0, len(seasonal_anomaly)):
+        line_name = seasonal_anomaly.iloc[i].name
+        seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
 
 def main():
@@ -116,13 +115,8 @@ def main():
     #end of dash
     ])
 
-    
-    
-    
-
-
-
-    app.run_server(debug=False, threaded=False)    
+    return app
+    #app.run_server(debug=False, threaded=False)    
 
 if __name__ == "__main__":
     main()
