@@ -9,7 +9,7 @@ https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based
 
 """
 
-import pdb
+#import pdb
 import flask
 import datetime
 from datetime import date
@@ -94,9 +94,9 @@ def main():
 
     ###********************* dash ***************************************
     app = dash.Dash(__name__, server=server)
-    application = app.server
+
     #app.scripts.config.serve_locally = True
-    
+
     app.layout = html.Div(children=[
         html.H1('Will this be the hottest year on record?'),
         html.Div([
@@ -118,9 +118,10 @@ def main():
             )),
     #end of dash
     ])
-
+    application = app.server
     #app.run_server(debug=False, threaded=False)    
-    application.run(debug=False, port=8080)
+    application.run(debug=False)
+
 if __name__ == "__main__":
     main()
 
