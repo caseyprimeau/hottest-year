@@ -95,6 +95,8 @@ def main():
     ###********************* dash ***************************************
     app = dash.Dash(__name__, server=server)
     application = app.server
+    #app.scripts.config.serve_locally = True
+    
     app.layout = html.Div(children=[
         html.H1('Will this be the hottest year on record?'),
         html.Div([
@@ -118,7 +120,7 @@ def main():
     ])
 
     #app.run_server(debug=False, threaded=False)    
-    application.run(debug=True, port=8080)
+    application.run(debug=False, port=8080)
 if __name__ == "__main__":
     main()
 
