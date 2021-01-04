@@ -100,7 +100,6 @@ def main():
 
     app.layout = html.Div(children=[
         html.H1('Will this be the hottest year on record?'),
-        
         html.Div([
             html.Div(html.H3(['[PredictIt Logo]', html.Br(),'''
             Latest Price (Yes): $ 

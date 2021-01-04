@@ -22,7 +22,6 @@ def gistemp_monthly_anomaly():
 def nasa_landocean(): 
     url = 'https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt'
     df = pd.read_csv(url, sep='\s+', header=None)
-
     df = df.drop([0,1,3]) #remove formatting rows
     df = df[df.columns[:-1]]
     df = df.reset_index(drop=True)
