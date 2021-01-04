@@ -28,6 +28,7 @@ import plotly.figure_factory as ff
 import colorlover as cl
 
 server = flask.Flask(__name__) # define flask app.server
+app = dash.Dash(__name__, server=server)
 
 def get_market_data():
     ####get PredictIt market data from API
@@ -93,7 +94,7 @@ def main():
     #pdb.set_trace()
 
     ###********************* dash ***************************************
-    app = dash.Dash(__name__, server=server)
+    
 
     #app.scripts.config.serve_locally = True
 
@@ -118,9 +119,9 @@ def main():
             )),
     #end of dash
     ])
-    application = app.server
-    #app.run_server(debug=False, threaded=False)    
-    application.run(debug=False)
+    #application = app.server
+    app.run_server(debug=False, threaded=False)    
+    #application.run(debug=False)
 
 if __name__ == "__main__":
     main()
