@@ -10,6 +10,7 @@ https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based
 """
 
 import pdb
+import flask
 import datetime
 from datetime import date
 import calendar
@@ -26,6 +27,7 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import colorlover as cl
 
+server = flask.Flask(__name__) # define flask app.server
 
 def get_market_data():
     ####get PredictIt market data from API
@@ -91,7 +93,7 @@ def main():
     #pdb.set_trace()
 
     ###********************* dash ***************************************
-    app = dash.Dash(__name__)
+    app = dash.Dash(__name__, server=server)
     
     app.layout = html.Div(children=[
         html.H1('Will this be the hottest year on record?'),
@@ -115,8 +117,7 @@ def main():
     #end of dash
     ])
 
-    return app
-    #app.run_server(debug=False, threaded=False)    
+    app.run_server(debug=False, threaded=False)    
 
 if __name__ == "__main__":
     main()
