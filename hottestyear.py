@@ -80,50 +80,46 @@ def seasonal_anomaly_fig(full_anomaly):
         seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
 
-def main():
+####predictit market data load - calls api every time
+market_data = get_market_data()
+lastPrice = market_data['contracts'][0]['lastTradePrice']
 
-    ####predictit market data load - calls api every time
-    market_data = get_market_data()
-    lastPrice = market_data['contracts'][0]['lastTradePrice']
+###load pre-fetched datasets
+full_anomaly = load_gistemp_monthly_anomaly() #nasa anomaly data used for monthly, seasonal
+yearly_landocean = load_nasa_yearly_landocean() #yearly nasa land-ocean temperature index
+nosmooth_landocean = yearly_landocean[yearly_landocean.columns[:-1]].nlargest(10, 'No_Smoothing')
+smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
+#pdb.set_trace()
 
-    ###load pre-fetched datasets
-    full_anomaly = load_gistemp_monthly_anomaly() #nasa anomaly data used for monthly, seasonal
-    yearly_landocean = load_nasa_yearly_landocean() #yearly nasa land-ocean temperature index
-    nosmooth_landocean = yearly_landocean[yearly_landocean.columns[:-1]].nlargest(10, 'No_Smoothing')
-    smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
-    #pdb.set_trace()
+###********************* dash ***************************************
 
-    ###********************* dash ***************************************
-    
 
-    #app.scripts.config.serve_locally = True
+#app.scripts.config.serve_locally = True
 
-    app.layout = html.Div(children=[
-        html.H1('Will this be the hottest year on record?'),
-        html.Div([
-            html.Div(html.H3(['[PredictIt Logo]', html.Br(),'''
-            Latest Price (Yes): $ 
-            ''' + str(lastPrice)]), className="six columns"
-            ),
-            html.Div([dash_table.DataTable(
-                columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
-                data=nosmooth_landocean.to_dict('records'),
-                style_as_list_view=False
-                )],className="eight columns")
-        ], className="row"),
-        html.Br(),
-        html.Div(
-            dcc.Graph(
-                id='anomaly',
-                figure=monthly_anomaly_fig(full_anomaly)
-            )),
-    #end of dash
-    ])
-    #application = app.server
-    app.run_server(debug=False, threaded=False)    
-    #application.run(debug=False)
+app.layout = html.Div(children=[
+    html.H1('Will this be the hottest year on record?'),
+    html.Div([
+        html.Div(html.H3(['[PredictIt Logo]', html.Br(),'''
+        Latest Price (Yes): $ 
+        ''' + str(lastPrice)]), className="six columns"
+        ),
+        html.Div([dash_table.DataTable(
+            columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
+            data=nosmooth_landocean.to_dict('records'),
+            style_as_list_view=False
+            )],className="eight columns")
+    ], className="row"),
+    html.Br(),
+    html.Div(
+        dcc.Graph(
+            id='anomaly',
+            figure=monthly_anomaly_fig(full_anomaly)
+        )),
+#end of dash
+])
+app.run_server(debug=False, threaded=False, host='0.0.0.0')    
 
-if __name__ == "__main__":
-    main()
+
+
 
     
