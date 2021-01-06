@@ -95,7 +95,7 @@ auth = dash_auth.BasicAuth(
 )
 
 #optional, overrides Dash html default including google analytics string
-app.index_string = infos.analytics_string
+#app.index_string = infos.analytics_string
 
 application = app.server
 
