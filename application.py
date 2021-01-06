@@ -87,7 +87,8 @@ def seasonal_anomaly_fig(full_anomaly):
 
 #app.scripts.config.serve_locally = True
 
-app = dash.Dash()
+app = dash.Dash(assets_folder='static/')
+
 application = app.server
 
 ####predictit market data load - calls api every time
