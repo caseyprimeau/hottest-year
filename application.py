@@ -27,7 +27,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import colorlover as cl
-
+import infos
 
 
 def get_market_data():
@@ -84,17 +84,19 @@ def seasonal_anomaly_fig(full_anomaly):
     #pdb.set_trace()
 
 ###********************* dash ***************************************
-VALID_USERNAME_PASSWORD_PAIRS = {
-    'hello': 'world'
-}
+
 
 #app.scripts.config.serve_locally = True
 
 app = dash.Dash(__name__, assets_folder='static')
 auth = dash_auth.BasicAuth(
     app,
-    VALID_USERNAME_PASSWORD_PAIRS
+    infos.VALID_USERNAME_PASSWORD_PAIRS
 )
+
+#optional, overrides Dash html default including google analytics string
+app.index_string = infos.analytics_string
+
 application = app.server
 
 ####predictit market data load - calls api every time

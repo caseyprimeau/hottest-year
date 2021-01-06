@@ -140,3 +140,4 @@ extra_scripts/junk.py
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+infos.py
