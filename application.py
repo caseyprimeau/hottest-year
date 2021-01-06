@@ -85,17 +85,20 @@ def seasonal_anomaly_fig(full_anomaly):
 
 ###********************* dash ***************************************
 
-
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'hello': 'woild',
+    'guest':'guest'
+}
 #app.scripts.config.serve_locally = True
 
 app = dash.Dash(__name__, assets_folder='static')
 auth = dash_auth.BasicAuth(
     app,
-    infos.VALID_USERNAME_PASSWORD_PAIRS
+    VALID_USERNAME_PASSWORD_PAIRS
 )
 
 #optional, overrides Dash html default including google analytics string
-#app.index_string = infos.analytics_string
+app.index_string = infos.analytics_string
 
 application = app.server
 
