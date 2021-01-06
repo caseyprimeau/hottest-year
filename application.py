@@ -87,7 +87,7 @@ def seasonal_anomaly_fig(full_anomaly):
 
 #app.scripts.config.serve_locally = True
 
-app = dash.Dash(assets_folder='static')
+app = dash.Dash(__name__, assets_folder='static')
 
 application = app.server
 
