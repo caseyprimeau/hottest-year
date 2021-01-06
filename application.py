@@ -80,6 +80,15 @@ def seasonal_anomaly_fig(full_anomaly):
         seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
 
+
+    #pdb.set_trace()
+
+###********************* dash ***************************************
+
+
+#app.scripts.config.serve_locally = True
+
+
 ####predictit market data load - calls api every time
 market_data = get_market_data()
 lastPrice = market_data['contracts'][0]['lastTradePrice']
@@ -89,12 +98,6 @@ full_anomaly = load_gistemp_monthly_anomaly() #nasa anomaly data used for monthl
 yearly_landocean = load_nasa_yearly_landocean() #yearly nasa land-ocean temperature index
 nosmooth_landocean = yearly_landocean[yearly_landocean.columns[:-1]].nlargest(10, 'No_Smoothing')
 smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
-#pdb.set_trace()
-
-###********************* dash ***************************************
-
-
-#app.scripts.config.serve_locally = True
 
 app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
@@ -117,7 +120,7 @@ app.layout = html.Div(children=[
         )),
 #end of dash
 ])
-app.run_server(debug=False, threaded=False, host='0.0.0.0')    
+app.run_server(debug=False, threaded=False, port=8080)    
 
 
 

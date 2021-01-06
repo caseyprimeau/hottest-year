@@ -136,3 +136,7 @@ junk.py
 tmax.2016.nc
 tmin.2016.nc
 extra_scripts/junk.py
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
