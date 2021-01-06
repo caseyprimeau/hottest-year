@@ -22,6 +22,7 @@ import copy
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_auth
 import plotly.express as px
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -83,12 +84,17 @@ def seasonal_anomaly_fig(full_anomaly):
     #pdb.set_trace()
 
 ###********************* dash ***************************************
-
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'hello': 'world'
+}
 
 #app.scripts.config.serve_locally = True
 
 app = dash.Dash(__name__, assets_folder='static')
-
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 application = app.server
 
 ####predictit market data load - calls api every time
