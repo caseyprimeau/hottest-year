@@ -27,8 +27,7 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import colorlover as cl
 
-server = flask.Flask(__name__) # define flask app.server
-app = dash.Dash(__name__, server=server)
+
 
 def get_market_data():
     ####get PredictIt market data from API
@@ -88,6 +87,8 @@ def seasonal_anomaly_fig(full_anomaly):
 
 #app.scripts.config.serve_locally = True
 
+app = dash.Dash()
+application = app.server
 
 ####predictit market data load - calls api every time
 market_data = get_market_data()
@@ -120,7 +121,9 @@ app.layout = html.Div(children=[
         )),
 #end of dash
 ])
-app.run_server(debug=False, threaded=False, port=8080)    
+
+if __name__ == '__main__':
+    application.run(debug=True, port=8080)
 
 
 
