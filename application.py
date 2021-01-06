@@ -79,22 +79,53 @@ def seasonal_anomaly_fig(full_anomaly):
         line_name = seasonal_anomaly.iloc[i].name
         seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
+analytics_string = '''<!DOCTYPE html>
+<html>
+<head>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRC3906SWR"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-TRC3906SWR');
+    </script>
+
+<!-- End Global Google Analytics -->
+{%metas%}
+<title>{%title%}</title>
+{%favicon%}
+{%css%}
+</head>
+<body>
+{%app_entry%}
+<footer>
+{%config%}
+{%scripts%}
+{%renderer%}
+</footer>
+</body>
+</html>
+'''
 
 
-    #pdb.set_trace()
 
 ###********************* dash ***************************************
-
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'hello': 'woild',
+    'guest':'guest'
+}
 #app.scripts.config.serve_locally = True
 
 app = dash.Dash(__name__, assets_folder='static')
 auth = dash_auth.BasicAuth(
     app,
-    infos.VALID_USERNAME_PASSWORD_PAIRS
+    VALID_USERNAME_PASSWORD_PAIRS
 )
 
 #optional, overrides Dash html default including google analytics string
-app.index_string = infos.analytics_string
+app.index_string = analytics_string
 
 application = app.server
 
