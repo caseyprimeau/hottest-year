@@ -81,8 +81,8 @@ def seasonal_anomaly_fig(full_anomaly):
 
 
 #app.scripts.config.serve_locally = True
-
-app = dash.Dash(__name__, assets_folder='static', )
+server = flask.Flask('app')
+app = dash.Dash('app', assets_folder='static', server=server)
 auth = dash_auth.BasicAuth(
     app,
     infos.VALID_USERNAME_PASSWORD_PAIRS
@@ -91,7 +91,7 @@ auth = dash_auth.BasicAuth(
 #optional, overrides Dash html default including google analytics string
 app.index_string = infos.analytics_string
 
-application = app.server
+#application = app.server
 
 ####predictit market data load - calls api every time
 market_data = get_market_data()
