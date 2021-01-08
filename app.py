@@ -9,16 +9,18 @@ https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based
 
 """
 
-#import pdb
-import flask
-import datetime
-from datetime import date
-import calendar
+import pdb
+
 import requests
 import pandas as pd
 import numpy as np
-import dash
+import datetime
+from datetime import date
+from pathlib import Path
 import copy
+import flask
+import calendar
+import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -36,24 +38,12 @@ def get_market_data():
     data = response.json()
     return data
 
-def load_gistemp_monthly_anomaly():
-    ###get csv file with nasa monthly global average temperature anomaly
-    file = 'source_data/gistemp_monthly.csv'
-    df = pd.read_csv(file)
-    return df
-
-def load_nasa_yearly_landocean():
-    file = 'source_data/nasa_landocean_yearly.csv'
-    df = pd.read_csv(file)
-    return df
-
 def monthly_anomaly_fig(full_anomaly):
     monthly_anomaly = full_anomaly
     i = 0
     while i < 6:  ###isolate monthly columns
         monthly_anomaly = monthly_anomaly[monthly_anomaly.columns[:-1]]
         i = i +1
-
     monthly_anomaly.set_index('Year', inplace=True)
     month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     colors = px.colors.qualitative.Plotly
@@ -80,7 +70,6 @@ def seasonal_anomaly_fig(full_anomaly):
         seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
 
-#app.scripts.config.serve_locally = True
 server = flask.Flask('app')
 app = dash.Dash('app', assets_folder='static', server=server)
 auth = dash_auth.BasicAuth(
@@ -88,21 +77,20 @@ auth = dash_auth.BasicAuth(
     infos.VALID_USERNAME_PASSWORD_PAIRS
 )
 
-#optional, overrides Dash html default including google analytics string
 app.index_string = infos.analytics_string
 app.title = 'Will this be the hottest year on record?'
-#application = app.server
 
 ####predictit market data load - calls api every time
-market_data = get_market_data()
-lastPrice = market_data['contracts'][0]['lastTradePrice']
+lastPrice = get_market_data()['contracts'][0]['lastTradePrice']
 
-###load pre-fetched datasets
-full_anomaly = load_gistemp_monthly_anomaly() #nasa anomaly data used for monthly, seasonal
-yearly_landocean = load_nasa_yearly_landocean() #yearly nasa land-ocean temperature index
+###load csv datasets
+home_dir = str(Path.home())
+full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
+yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #yearly nasa land-ocean temperature index
 nosmooth_landocean = yearly_landocean[yearly_landocean.columns[:-1]].nlargest(10, 'No_Smoothing')
 smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
 
+#pdb.set_trace()
 app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
@@ -111,7 +99,8 @@ app.layout = html.Div(children=[
         ''' + str(lastPrice)]), className="six columns"
         ),
         html.Div([dash_table.DataTable(
-            columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
+            #columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
+            columns=[{"name": "Year", "id":"Year"}, {"name": "Temperature Index", "id":"No_Smoothing"}],
             data=nosmooth_landocean.to_dict('records'),
             style_as_list_view=False
             )],className="eight columns")
