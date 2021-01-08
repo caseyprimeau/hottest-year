@@ -90,7 +90,7 @@ auth = dash_auth.BasicAuth(
 
 #optional, overrides Dash html default including google analytics string
 app.index_string = infos.analytics_string
-
+app.title = 'Will this be the hottest year on record?'
 #application = app.server
 
 ####predictit market data load - calls api every time
