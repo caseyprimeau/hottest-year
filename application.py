@@ -126,7 +126,7 @@ app.layout = html.Div(children=[
 ])
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', server = application)
+    app.run_server(debug=False, host='0.0.0.0')
 
 
 
