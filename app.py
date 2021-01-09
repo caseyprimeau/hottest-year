@@ -38,7 +38,7 @@ def get_market_data():
     data = response.json()
     return data
 
-def monthly_anomaly_fig(full_anomaly):
+def monthly_anomaly_fig(full_anomaly, colordf):
     monthly_anomaly = full_anomaly
     i = 0
     while i < 6:  ###isolate monthly columns
@@ -51,7 +51,7 @@ def monthly_anomaly_fig(full_anomaly):
     #pdb.set_trace()
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
-        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name))
+        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colordf.loc[int(line_name)][1]))
     return monthly_anomaly_fig
 
 def seasonal_anomaly_fig(full_anomaly):
@@ -69,6 +69,11 @@ def seasonal_anomaly_fig(full_anomaly):
         line_name = seasonal_anomaly.iloc[i].name
         seasonal_anomaly_fig.add_trace(go.Scatter(y=seasonal_anomaly.iloc[i], x=season_list, name=str(line_name)))
 
+def colorize_years(row):
+    if row['No_Smoothing'] > 0.6:
+        return '#FF0000'
+    else:
+        return'#FFFFFF'
 
 server = flask.Flask('app')
 app = dash.Dash('app', assets_folder='static', server=server)
@@ -85,10 +90,19 @@ lastPrice = get_market_data()['contracts'][0]['lastTradePrice']
 
 ###load csv datasets
 home_dir = str(Path.home())
-full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
 yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #yearly nasa land-ocean temperature index
 nosmooth_landocean = yearly_landocean[yearly_landocean.columns[:-1]].nlargest(10, 'No_Smoothing')
-smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
+#smoothed_landocean = yearly_landocean.drop('No_Smoothing',1).nlargest(10, 'Lowess(5)')
+
+colordf = yearly_landocean[yearly_landocean.columns[:-1]]
+colordf['color'] = colordf.apply(colorize_years, axis=1)
+colordf = colordf.set_index('Year')
+colordf.loc[2020]=['','#FEE12B']
+colordf.loc[2021]=['','#FEE12B']
+#above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
+#pdb.set_trace()
+full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
+
 
 #pdb.set_trace()
 app.layout = html.Div(children=[
@@ -96,20 +110,31 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div(html.H3(['[PredictIt Logo]', html.Br(),'''
         Latest Price (Yes): $ 
-        ''' + str(lastPrice)]), className="six columns"
+        ''' + str(lastPrice)]), className="eight columns"
         ),
-        html.Div([dash_table.DataTable(
-            #columns=[{"name": i, "id": i} for i in nosmooth_landocean.columns],
-            columns=[{"name": "Year", "id":"Year"}, {"name": "Temperature Index", "id":"No_Smoothing"}],
-            data=nosmooth_landocean.to_dict('records'),
-            style_as_list_view=False
-            )],className="eight columns")
+        html.Div(
+            [html.Label('All Time Highest Years', style={'fontWeight':'500', 'textAlign':'center'}), 
+                dash_table.DataTable(
+                columns=[{"name": "Year", "id":"Year"}, {"name": "Land-Sea Temperature Index (Unsmoothed)", "id":"No_Smoothing"}],
+                data=nosmooth_landocean.to_dict('records'),
+                style_as_list_view=False,
+                style_cell={'textAlign':'center'},
+                style_cell_conditional=[
+                {'if': {'id': 'Year'},
+                'width': '50%'},
+                {'if': {'id': 'No_Smoothing'},
+                'width': '50%'}]
+            )],className="four columns")
     ], className="row"),
     html.Br(),
     html.Div(
         dcc.Graph(
             id='anomaly',
-            figure=monthly_anomaly_fig(full_anomaly)
+            figure=monthly_anomaly_fig(full_anomaly, colordf).
+                update_layout(title="Monthly Temperature Anomaly 1880-Present", 
+                              title_x=0.5,
+                              paper_bgcolor="white",
+                              margin=dict(l=0,r=0,b=20,t=40,pad=10))
         )),
 #end of dash
 ])
