@@ -3,20 +3,18 @@ import datetime
 from datetime import date
 import requests
 import pandas as pd
+from pathlib import Path
 
+home_dir = str(Path.home())
 
 def gistemp_monthly_anomaly():
     url = 'https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv'
-    df = pd.read_csv(url)
-    df.to_csv('source_data/gistemp_monthly.csv')
-    df = pd.read_csv('source_data/gistemp_monthly.csv')
+    df = pd.read_csv(url, header=1)
+    #df = pd.read_csv('source_data/gistemp_monthly.csv')
     ###remove header, promote first row to column headers
-    new_header = df.iloc[0]
-    df = df[1:]
-    df.columns = new_header
     df = df.iloc[::-1] #flip order of rows
-    #pdb.set_trace()
-    df.to_csv('source_data/gistemp_monthly.csv', index=False)
+    df = df.replace('***', '')
+    df.to_csv(home_dir + '/data/gistemp_monthly.csv', index=False)
 
 
 def nasa_landocean(): 
@@ -29,7 +27,7 @@ def nasa_landocean():
     df = df[1:]
     df.columns = new_header
     df = df.iloc[::-1] #flip order of rows
-    df.to_csv('source_data/nasa_landocean_yearly.csv', index=False)
+    df.to_csv(home_dir + '/data/nasa_landocean_yearly.csv', index=False)
 
 
 def main():
