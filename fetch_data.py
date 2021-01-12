@@ -9,30 +9,31 @@ home_dir = str(Path.home())
 
 def gistemp_monthly_anomaly():
     url = 'https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv'
-    df = pd.read_csv(url, header=1)
-    #df = pd.read_csv('source_data/gistemp_monthly.csv')
-    ###remove header, promote first row to column headers
+    df = pd.read_csv(url, header=1) #remove header
     df = df.iloc[::-1] #flip order of rows
     df = df.replace('***', '')
+    for i in range(0,6):  ###isolate monthly columns
+        df = df[df.columns[:-1]]
     df.to_csv(home_dir + '/data/gistemp_monthly.csv', index=False)
 
 
-def nasa_landocean(): 
+def nasa_yearly_landocean(): 
     url = 'https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt'
-    df = pd.read_csv(url, sep='\s+', header=None)
+    df = pd.read_csv(url, sep='\s+', header=2)
     df = df.drop([0,1,3]) #remove formatting rows
     df = df[df.columns[:-1]]
     df = df.reset_index(drop=True)
-    new_header = df.iloc[0]
-    df = df[1:]
-    df.columns = new_header
-    df = df.iloc[::-1] #flip order of rows
+    #new_header = df.iloc[0]
+    #df = df[1:]
+    #df.columns = new_header
+    #df = df.iloc[::-1] #flip order of rows
+    df.sort_values(by='No_Smoothing', ascending=False, inplace=True)
     df.to_csv(home_dir + '/data/nasa_landocean_yearly.csv', index=False)
 
 
 def main():
     gistemp_monthly_anomaly()
-    nasa_landocean()
+    nasa_yearly_landocean()
     print('made fetch happen')
 
 if __name__ ==  "__main__":
