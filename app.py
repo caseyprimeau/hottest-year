@@ -198,18 +198,13 @@ def get_24hr_change(n):
         try:
             result = ' $' + str(round(current_price[0][0] - yesterday_price[0][0],2))
         except:
-            result = 'Not Available'
+            result = 'Unavailable'
         return result
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0')
 
 
-
-
-    
 #def seasonal_anomaly_fig(full_anomaly):
 #    ###load and prepare seasonal df
 #
