@@ -124,11 +124,11 @@ app.layout = html.Div(children=[
             title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website"""
             )), 
         html.H3(
-            [html.Div('Latest Price (Yes): $'),
+            [html.Div('Latest Price (Yes): $', style={"margin-left": "-2px"}),
             html.Div(id='live-update-text')], className="row"
             ),
         html.H3(
-            [html.Div('24 Hour Change:'),
+            [html.Div('24 Hour Change:', style={"margin-right": "10px", "margin-left": "-2px"}),
             html.Div(id='24h-update-text')], className="row"
             ),
         dcc.Interval(
@@ -194,9 +194,9 @@ def get_24hr_change(n):
         #yesterday_price = cur.execute("SELECT price FROM price WHERE strftime('%Y-%m-%d %H:%M',datetime) LIKE datetime(strftime('%Y-%m-%d %H:%M'," + current_price[0][0]+ ",'-1 hour'));").fetchall()
 
         ###subquery version for performance test:
-        yesterday_price = cur.execute("SELECT price FROM price WHERE strftime('%Y-%m-%d %H:%M',datetime) LIKE (SELECT strftime('%Y-%m-%d %H:%M',datetime(datetime,'-1 hour')) FROM price ORDER BY rowid DESC LIMIT 1);").fetchall()
+        yesterday_price = cur.execute("SELECT price FROM price WHERE strftime('%Y-%m-%d %H:%M',datetime) LIKE (SELECT strftime('%Y-%m-%d %H:%M',datetime(datetime,'-1 day')) FROM price ORDER BY rowid DESC LIMIT 1);").fetchall()
         try:
-            result = '$' + str(round(current_price[0][0] - yesterday_price[0][0],2))
+            result = ' $' + str(round(current_price[0][0] - yesterday_price[0][0],2))
         except:
             result = 'Not Available'
         return result
