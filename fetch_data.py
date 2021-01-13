@@ -19,14 +19,10 @@ def gistemp_monthly_anomaly():
 
 def nasa_yearly_landocean(): 
     url = 'https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt'
-    df = pd.read_csv(url, sep='\s+', header=2)
+    df = pd.read_csv(url, sep='\s+', header=2) #remove header
     df = df.drop([0,1,3]) #remove formatting rows
-    df = df[df.columns[:-1]]
+    df = df[df.columns[:-1]] #drop smoothing column
     df = df.reset_index(drop=True)
-    #new_header = df.iloc[0]
-    #df = df[1:]
-    #df.columns = new_header
-    #df = df.iloc[::-1] #flip order of rows
     df.sort_values(by='No_Smoothing', ascending=False, inplace=True)
     df.to_csv(home_dir + '/data/nasa_landocean_yearly.csv', index=False)
 

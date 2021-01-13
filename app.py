@@ -11,12 +11,13 @@ https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based
 import pdb
 
 import requests
-import pandas as pd
-import numpy as np
 import datetime
 from datetime import date
 from pathlib import Path
 import copy
+import pandas as pd
+import numpy as np
+import sqlite3
 import flask
 import calendar
 import dash
@@ -51,7 +52,7 @@ def showdown_scatter(monthly_anomaly):
         height=200,
         paper_bgcolor="white",
         plot_bgcolor="#F2F2F2",
-        margin=dict(l=5,r=25,b=20,t=40,pad=10),
+        margin=dict(l=10,r=25,b=20,t=40,pad=10),
         yaxis = dict(showgrid=False),
         xaxis = dict(
         range=[0,11],
@@ -98,8 +99,10 @@ def colorize_row(row):
     else:
         return'#FFFFFF'
 
-####predictit market data load - calls api every time
-lastPrice = get_market_data()['contracts'][0]['lastTradePrice']
+####predictit market data load - from sqlite db
+with sqlite3.connect('/home/casey/data/hottest.db') as conn:
+    cur = conn.cursor()
+    last_price = cur.execute("SELECT datetime FROM price ORDER BY rowid DESC LIMIT 1;").fetchall()[0][0]
 
 ###load csv datasets
 home_dir = str(Path.home())
@@ -123,16 +126,19 @@ app.title = 'Will this be the hottest year on record?'
 app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
-        html.Div(html.H3([dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record"), 
+        html.Div(html.H2([dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record"), 
         html.Br(),
-        '''
-        Latest Price (Yes): $ 
-        ''' 
-        + str(lastPrice)]), className="seven columns"
+        'Latest Price (Yes): $' + str(last_price),
+        html.Br(),
+
+
+        
+        ]), className="seven columns"
         ),
         html.Div(
-            [html.Label('Yearly Temperature Anomaly', style={'fontWeight':'500', 'textAlign':'center'}), 
-                dash_table.DataTable(
+            [html.Br(),
+            html.Label('Yearly Temperature Anomaly', style={'textAlign':'center'}), 
+            dash_table.DataTable(
                 columns=[{"name": "Year", "id":"Year"}, {"name": "Land-Sea Temperature Index (Unsmoothed)", "id":"No_Smoothing"}],
                 data=yearly_landocean.to_dict('records'),
                 style_as_list_view=False,
