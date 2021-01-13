@@ -25,6 +25,7 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_auth
+from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -32,11 +33,6 @@ import colorlover as cl
 import infos
 from colormap import rgb2hex
 
-def get_market_data():
-    ####get PredictIt market data from API
-    response = requests.get('https://www.predictit.org/api/marketdata/markets/6234/')
-    data = response.json()
-    return data
 
 def showdown_scatter(monthly_anomaly):
     #takes full monthly_anomaly csv  df, produces current year vs. reigning champion  
@@ -45,12 +41,12 @@ def showdown_scatter(monthly_anomaly):
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
         if line_name in ('2016', '2020', '2021'):
-            monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))#, line_color=colordf.loc[int(line_name)][1]))
+            monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))
     monthly_anomaly_fig.update_layout(
         title="Current Year vs. Standing Record", 
         title_x=0.5,
         height=200,
-        paper_bgcolor="white",
+        paper_bgcolor="#FFFFFF",
         plot_bgcolor="#F2F2F2",
         margin=dict(l=10,r=25,b=20,t=40,pad=10),
         yaxis = dict(showgrid=False),
@@ -67,7 +63,7 @@ def monthly_anomaly_fig(monthly_anomaly):
     monthly_anomaly_fig = go.Figure()
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
-        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))#, line_color=colordf.loc[int(line_name)][1]))
+        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))
     monthly_anomaly_fig.update_layout(
         title="Monthly Temperature Anomaly 1880-Present", 
         title_x=0.5,
@@ -99,17 +95,14 @@ def colorize_row(row):
     else:
         return'#FFFFFF'
 
-####predictit market data load - from sqlite db
-with sqlite3.connect('/home/casey/data/hottest.db') as conn:
-    cur = conn.cursor()
-    last_price = cur.execute("SELECT datetime FROM price ORDER BY rowid DESC LIMIT 1;").fetchall()[0][0]
-
 ###load csv datasets
 home_dir = str(Path.home())
 yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #yearly nasa land-ocean temperature index
 full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
 full_anomaly.set_index('Year', inplace=True)
 
+
+###
 #======================================
 #   Dash                              
 #======================================
@@ -126,18 +119,29 @@ app.title = 'Will this be the hottest year on record?'
 app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
-        html.Div(html.H2([dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record"), 
-        html.Br(),
-        'Latest Price (Yes): $' + str(last_price),
-        html.Br(),
-
-
-        
-        ]), className="seven columns"
+        html.Div(
+            [html.H2(dcc.Link(' PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
+            title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website"""
+            )), 
+        html.H3(
+            [html.Div('Latest Price (Yes): $'),
+            html.Div(id='live-update-text')], className="row"
+            ),
+        html.H3(
+            [html.Div('24 Hour Change:'),
+            html.Div(id='24h-update-text')], className="row"
+            ),
+        dcc.Interval(
+            id='interval-component',
+            interval=60*1000,
+            n_intervals=0
+            ),
+           
+        ], className="seven columns"
         ),
         html.Div(
             [html.Br(),
-            html.Label('Yearly Temperature Anomaly', style={'textAlign':'center'}), 
+            html.Label('Annual Average Temperature Anomaly', style={'textAlign':'center'}), 
             dash_table.DataTable(
                 columns=[{"name": "Year", "id":"Year"}, {"name": "Land-Sea Temperature Index (Unsmoothed)", "id":"No_Smoothing"}],
                 data=yearly_landocean.to_dict('records'),
@@ -167,8 +171,37 @@ app.layout = html.Div(children=[
             figure=monthly_anomaly_fig(full_anomaly)
             
         )),
-#end of dash
+###end of dash
 ])
+
+###callbacks
+@app.callback(Output('live-update-text', 'children'),
+              Input('interval-component', 'n_intervals'))
+def get_market_data(n):
+    ####get PredictIt market data from API
+    response = requests.get('https://www.predictit.org/api/marketdata/markets/6234/')
+    data = response.json()
+    return data['contracts'][0]['lastTradePrice']
+
+@app.callback(Output('24h-update-text', 'children'),
+              Input('interval-component', 'n_intervals'))
+def get_24hr_change(n):
+    #### 24 hr change data load - from sqlite db
+    with sqlite3.connect('/home/casey/data/hottest.db') as conn:
+        cur = conn.cursor()
+        current_price = cur.execute("SELECT price FROM price ORDER BY rowid DESC LIMIT 1").fetchall()
+        ###python-provided filter version for performance test:
+        #yesterday_price = cur.execute("SELECT price FROM price WHERE strftime('%Y-%m-%d %H:%M',datetime) LIKE datetime(strftime('%Y-%m-%d %H:%M'," + current_price[0][0]+ ",'-1 hour'));").fetchall()
+
+        ###subquery version for performance test:
+        yesterday_price = cur.execute("SELECT price FROM price WHERE strftime('%Y-%m-%d %H:%M',datetime) LIKE (SELECT strftime('%Y-%m-%d %H:%M',datetime(datetime,'-1 hour')) FROM price ORDER BY rowid DESC LIMIT 1);").fetchall()
+        try:
+            result = '$' + str(round(current_price[0][0] - yesterday_price[0][0],2))
+        except:
+            result = 'Not Available'
+        return result
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0')
