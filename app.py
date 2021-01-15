@@ -51,32 +51,10 @@ def showdown_scatter(monthly_anomaly):
         margin=dict(l=10,r=25,b=20,t=40,pad=10),
         yaxis = dict(showgrid=False),
         xaxis = dict(
-        range=[0,11],
-        showgrid=False,
-        )
-    )
+            range=[0,11],
+            showgrid=False,))
     return monthly_anomaly_fig
 
-def monthly_anomaly_fig(monthly_anomaly):
-    #takes full monthly_anomaly csv  df, produces 1880-Present scatter plot  
-    month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-    monthly_anomaly_fig = go.Figure()
-    for i in range(0, len(monthly_anomaly)):
-        line_name = str(monthly_anomaly.iloc[i].name)
-        monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))
-    monthly_anomaly_fig.update_layout(
-        title="Monthly Temperature Anomaly 1880-Present", 
-        title_x=0.5,
-        paper_bgcolor="white",
-        plot_bgcolor="#F2F2F2",
-        margin=dict(l=5,r=25,b=20,t=40,pad=10),
-        yaxis = dict(showgrid=False),
-        xaxis = dict(
-        range=[0,11],
-        showgrid=False,
-        )
-    )
-    return monthly_anomaly_fig
 
 def colorize_row(row):
     #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
@@ -101,7 +79,6 @@ yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #ye
 full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
 full_anomaly.set_index('Year', inplace=True)
 
-
 ###
 #======================================
 #   Dash                              
@@ -120,43 +97,43 @@ app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
         html.Div(
-            [html.H2(dcc.Link(' PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
+            [html.H2(dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
             title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website"""
             )), 
-        html.H3(
-            [html.Div('Latest Price (Yes): $', style={"margin-left": "-2px"}),
-            html.Div(id='live-update-text')], className="row"
-            ),
-        html.H3(
-            [html.Div('24 Hour Change:', style={"margin-right": "10px", "margin-left": "-2px"}),
-            html.Div(id='24h-update-text')], className="row"
-            ),
-        dcc.Interval(
-            id='interval-component',
-            interval=60*1000,
-            n_intervals=0
-            ),
-           
-        ], className="seven columns"
-        ),
+            html.H3(
+                [html.Div('Latest Price (Yes): $', style={"margin-left": "0px"}),
+                html.Div(id='live-update-text')], className="row"
+                ),
+            html.H3(
+                [html.Div('24 Hour Change:', style={"margin-right": "10px", "margin-left": "0px"}),
+                html.Div(id='24h-update-text')], className="row"
+                ),
+            dcc.Interval(
+                id='interval-component',
+                interval=60*1000,
+                n_intervals=0),
+        ], className="seven columns"),
         html.Div(
-            [html.Br(),
-            html.Label('Annual Average Temperature Anomaly', style={'textAlign':'center'}), 
+            [
+            html.Label('Annual Average Temperature Anomaly', style={'textAlign':'center','fontSize':16}), 
             dash_table.DataTable(
-                columns=[{"name": "Year", "id":"Year"}, {"name": "Land-Sea Temperature Index (Unsmoothed)", "id":"No_Smoothing"}],
+                columns=[{"name": "Year", "id":"Year"}, 
+                        {"name": "Land-Sea Temperature Index", 
+                        "id":"No_Smoothing"}],
                 data=yearly_landocean.to_dict('records'),
                 style_as_list_view=False,
                 style_table={
                     'overflowY': 'scroll',
                     'height': '250px',
-                },
+                    'fontSize':14,
+                    'padding':5},
                 style_cell={'textAlign':'center'},
                 style_cell_conditional=[
                 {'if': {'id': 'Year'},
                 'width': '50%'},
                 {'if': {'id': 'No_Smoothing'},
                 'width': '50%'}]
-            )],className="five columns")
+            )],style={'backgroundColor':'#FFFFFF','padding-left':15,'padding-right':15, 'padding-top': 0, 'marginLeft': '10px', 'marginTop': '20px'},className="five columns")
     ], className="row"),
     html.Br(),
     html.Div(
@@ -165,16 +142,64 @@ app.layout = html.Div(children=[
             figure=showdown_scatter(full_anomaly)
         )),
     html.Br(),        
-    html.Div(
+    html.Div([
+        html.Label(
+            id='anomaly-label',
+            style={'textAlign':'center','fontSize':16,}),
+        dcc.RangeSlider(
+            id='year-slider',
+            min=1880,
+            max=2020,
+            value=[1900,2020]),
         dcc.Graph(
-            id='anomaly',
-            figure=monthly_anomaly_fig(full_anomaly)
-            
-        )),
+            id='anomaly-scatter',),
+    ], style={'backgroundColor':'#FFFFFF'}),
 ###end of dash
 ])
 
 ###callbacks
+@app.callback(Output('anomaly-label', 'children'),
+                Input('year-slider', 'value'))
+def update_label(value):
+    title =f"Monthly Temperature Anomaly {value[0]}-{value[1]}"
+    return title
+
+
+@app.callback(Output('anomaly-scatter', 'figure'),
+              [Input('year-slider', 'value')])      
+def monthly_anomaly_fig(value):
+    #takes full monthly_anomaly csv  df, produces 1880-Present scatter plot  
+    monthly_anomaly = full_anomaly
+    month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    monthly_anomaly_fig = go.Figure()
+    #monthly_anomaly.at[2010, 'Jan']
+    include_range = reversed(range(value[0],value[1]+1))
+    for each in include_range:
+        monthly_anomaly_fig.add_trace(
+            go.Scatter(
+            y=monthly_anomaly.loc[each], 
+            #pdb.set_trace()
+            #y=[monthly_anomaly.at[each]]
+            x=month_list, 
+            name=str(monthly_anomaly.loc[each].name), 
+            line_color=colorize_row(monthly_anomaly.loc[each]),
+            marker_symbol='line-ns'            
+            ))
+        #monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=str(monthly_anomaly.iloc[i].name), line_color=colorize_row(monthly_anomaly.iloc[i])))
+    monthly_anomaly_fig.update_layout(
+        paper_bgcolor="white",
+        plot_bgcolor="#F2F2F2",
+        width=800,
+        margin=dict(l=20,r=112,b=20,t=0,pad=10),
+        yaxis = dict(showgrid=False),
+        xaxis = dict(
+            range=[0,11],
+            showgrid=False),
+        legend = dict(bordercolor='#F2F2F2', borderwidth=1, x = 1.02),    
+            )
+    #figure=monthly_anomaly_fig(full_anomaly)        
+    return monthly_anomaly_fig
+
 @app.callback(Output('live-update-text', 'children'),
               Input('interval-component', 'n_intervals'))
 def get_market_data(n):
@@ -200,6 +225,7 @@ def get_24hr_change(n):
         except:
             result = 'Unavailable'
         return result
+
 
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0')
