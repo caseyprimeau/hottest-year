@@ -33,6 +33,12 @@ import colorlover as cl
 import infos
 from colormap import rgb2hex
 
+def loess_plot(moyhu_data):
+    lowess_fig = px.scatter(moyhu_data, x="Year", y="TempLSLOESS", trendline="lowess")
+    lowess_fig.update_layout(
+        title="TempLS LOESS Trend",
+        title_x=0.5)
+    return lowess_fig 
 
 def showdown_scatter(monthly_anomaly):
     #takes full monthly_anomaly csv  df, produces current year vs. reigning champion  
@@ -41,11 +47,12 @@ def showdown_scatter(monthly_anomaly):
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
         if line_name in ('2016', '2020', '2021'):
-            monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, line_color=colorize_row(monthly_anomaly.iloc[i])))
+            monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_row(monthly_anomaly.iloc[i]) ))
     monthly_anomaly_fig.update_layout(
         title="Current Year vs. Standing Record", 
         title_x=0.5,
         height=200,
+  
         paper_bgcolor="#FFFFFF",
         plot_bgcolor="#F2F2F2",
         margin=dict(l=10,r=25,b=20,t=40,pad=10),
@@ -78,7 +85,7 @@ home_dir = str(Path.home())
 yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #yearly nasa land-ocean temperature index
 full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
 full_anomaly.set_index('Year', inplace=True)
-
+moyhu_data = pd.read_csv(home_dir + '/data/moyhu_monthly.csv')
 ###
 #======================================
 #   Dash                              
@@ -98,8 +105,8 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div(
             [html.H2(dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
-            title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website"""
-            )), 
+            title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website."""
+            )),
             html.H3(
                 [html.Div('Latest Price (Yes): $', style={"margin-left": "0px"}),
                 html.Div(id='live-update-text')], className="row"
@@ -154,6 +161,14 @@ app.layout = html.Div(children=[
         dcc.Graph(
             id='anomaly-scatter',),
     ], style={'backgroundColor':'#FFFFFF'}),
+    html.Br(),
+    html.Div(
+        dcc.Graph(
+            id='moyhu_plot',
+            figure=loess_plot(moyhu_data)
+        )),
+    html.Br(),        
+
 ###end of dash
 ])
 
@@ -189,8 +204,8 @@ def monthly_anomaly_fig(value):
     monthly_anomaly_fig.update_layout(
         paper_bgcolor="white",
         plot_bgcolor="#F2F2F2",
-        width=800,
-        margin=dict(l=20,r=112,b=20,t=0,pad=10),
+        #width=800,
+        margin=dict(l=20,r=40,b=20,t=0,pad=10),
         yaxis = dict(showgrid=False),
         xaxis = dict(
             range=[0,11],

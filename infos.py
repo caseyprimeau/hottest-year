@@ -32,6 +32,5 @@ analytics_string = '''<!DOCTYPE html>
 
 ###********************* dash ***************************************
 VALID_USERNAME_PASSWORD_PAIRS = {
-    'hello': 'woild',
     'guest':'guest'
 }
