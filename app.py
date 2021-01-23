@@ -33,52 +33,8 @@ import colorlover as cl
 import infos
 from colormap import rgb2hex
 
-def loess_plot(moyhu_data):
-    lowess_fig = px.scatter(moyhu_data, x="Year", y="TempLSLOESS", trendline="lowess")
-    lowess_fig.update_layout(
-        title="TempLS LOESS Trend",
-        title_x=0.5)
-    return lowess_fig 
-
-def showdown_scatter(monthly_anomaly):
-    #takes full monthly_anomaly csv  df, produces current year vs. reigning champion  
-    month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-    monthly_anomaly_fig = go.Figure()
-    for i in range(0, len(monthly_anomaly)):
-        line_name = str(monthly_anomaly.iloc[i].name)
-        if line_name in ('2016', '2020', '2021'):
-            monthly_anomaly_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_row(monthly_anomaly.iloc[i]) ))
-    monthly_anomaly_fig.update_layout(
-        title="Current Year vs. Standing Record", 
-        title_x=0.5,
-        height=200,
-  
-        paper_bgcolor="#FFFFFF",
-        plot_bgcolor="#F2F2F2",
-        margin=dict(l=10,r=25,b=20,t=40,pad=10),
-        yaxis = dict(showgrid=False),
-        xaxis = dict(
-            range=[0,11],
-            showgrid=False,))
-    return monthly_anomaly_fig
 
 
-def colorize_row(row):
-    #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
-    if row.name in(2021, 2020):
-        return '#800080'
-    if row.mean() > 0.6:
-        return '#FF0000'
-    elif 0.6 >= row.mean() > 0.1:
-        return '#ef7f1c'
-    elif 0.1 >= row.mean() > 0.0:
-        return '#96ce48'      
-    elif 0 >= row.mean() > -0.21:
-        return '#64ad7f'
-    elif -0.21>= row.mean():
-        return '#6d9d95'            
-    else:
-        return'#FFFFFF'
 
 ###load csv datasets
 home_dir = str(Path.home())
@@ -86,7 +42,7 @@ yearly_landocean = pd.read_csv(home_dir + '/data/nasa_landocean_yearly.csv') #ye
 full_anomaly = pd.read_csv(home_dir + '/data/gistemp_monthly.csv') #nasa anomaly data used for monthly, seasonal
 full_anomaly.set_index('Year', inplace=True)
 moyhu_data = pd.read_csv(home_dir + '/data/moyhu_monthly.csv')
-###
+
 #======================================
 #   Dash                              
 #======================================
@@ -122,7 +78,7 @@ app.layout = html.Div(children=[
         ], className="seven columns"),
         html.Div(
             [
-            html.Label('Annual Average Temperature Anomaly', style={'textAlign':'center','fontSize':16}), 
+            html.Label('Annual Average Temperature Anomaly', id='dummy-label',style={'textAlign':'center','fontSize':16}), 
             dash_table.DataTable(
                 columns=[{"name": "Year", "id":"Year"}, 
                         {"name": "Land-Sea Temperature Index", 
@@ -145,9 +101,7 @@ app.layout = html.Div(children=[
     html.Br(),
     html.Div(
         dcc.Graph(
-            id='showdown',
-            figure=showdown_scatter(full_anomaly)
-        )),
+            id='showdown-scatter',)),
     html.Br(),        
     html.Div([
         html.Label(
@@ -162,20 +116,87 @@ app.layout = html.Div(children=[
             id='anomaly-scatter',),
     ], style={'backgroundColor':'#FFFFFF'}),
     html.Br(),
-    html.Div(
+    html.Div([
+        html.Div([
+        dcc.Dropdown(
+            id='templs-dropdown',
+            options=[
+                {'label':'TempLSgrid',          'value':'TempLSgrid'},
+                {'label':'TempLSinfill',        'value':'TempLSinfill'},
+                {'label':'TempLSLOESS',         'value':'TempLSLOESS'},
+                {'label':'TempLSmesh',          'value':'TempLSmesh'},
+                {'label':'TempLSgrid_adj',      'value':'TempLSgrid_adj'},
+                {'label':'TempLSinfill_adj',    'value':'TempLSinfill_adj'},
+                {'label':'TempLSLOESS_adj',     'value':'TempLSLOESS_adj'},
+                {'label':'TempLSmesh_adj',      'value':'TempLSmesh_adj'},
+                {'label':'TempLS_SST',          'value':'TempLS_SST'},
+                {'label':'TempLS_La',           'value':'TempLS_La'},
+            ],
+            value ='TempLSgrid',
+            style={'fontSize':20, 'width':300}
+            )], className="row"),
         dcc.Graph(
-            id='moyhu_plot',
-            figure=loess_plot(moyhu_data)
-        )),
-    html.Br(),        
-
-###end of dash
+            id='templs-plot',
+            style={'textAlign':'center','fontSize':16,}),
+        ]),
+    html.Br(),
+###end of dash layout
 ])
 
+def colorize_row(row):
+    #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
+    if row.name in(2021, 2020):
+        return '#800080'
+    if row.mean() > 0.6:
+        return '#FF0000'
+    elif 0.6 >= row.mean() > 0.1:
+        return '#ef7f1c'
+    elif 0.1 >= row.mean() > 0.0:
+        return '#96ce48'      
+    elif 0 >= row.mean() > -0.21:
+        return '#64ad7f'
+    elif -0.21>= row.mean():
+        return '#6d9d95'            
+    else:
+        return'#FFFFFF'
+
+def colorize_marker(value):
+    #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
+    if value > 0.6:
+        return '#FF0000'
+    elif 0.6 >= value > 0.1:
+        return '#ef7f1c'
+    elif 0.1 >= value > 0.0:
+        return '#96ce48'      
+    elif 0 >= value > -0.21:
+        return '#64ad7f'
+    elif -0.21>= value:
+        return '#6d9d95'            
+    else:
+        return'#FFFFFF'
+
 ###callbacks
+@app.callback(Output('templs-plot', 'figure'),
+                Input('templs-dropdown', 'value'))
+def monthly_tempLS_fig(value):
+    templs_fig = px.scatter(moyhu_data, x="Year", y=value, trendline="lowess")
+    templs_fig.update_layout(
+        title="TempLS LOESS Trend: " + value,
+        title_x=0.5,
+        paper_bgcolor="white",
+        plot_bgcolor="#F2F2F2",
+        margin=dict(l=10,r=20,b=30,pad=10),
+        xaxis_title="",
+        yaxis_title="",
+        yaxis = dict(showgrid=False),
+        xaxis = dict(showgrid=True))
+    templs_fig.update_traces(marker=dict(color=moyhu_data.groupby(moyhu_data.Year.astype(str).str[:4])[value].transform('mean').apply(colorize_marker).tolist()))
+    return templs_fig 
+
+
 @app.callback(Output('anomaly-label', 'children'),
                 Input('year-slider', 'value'))
-def update_label(value):
+def update_anomaly_title(value):
     title =f"Monthly Temperature Anomaly {value[0]}-{value[1]}"
     return title
 
@@ -183,7 +204,7 @@ def update_label(value):
 @app.callback(Output('anomaly-scatter', 'figure'),
               [Input('year-slider', 'value')])      
 def monthly_anomaly_fig(value):
-    #takes full monthly_anomaly csv  df, produces 1880-Present scatter plot  
+    #input full monthly_anomaly csv  df, output 1880-Present scatter plot  
     monthly_anomaly = full_anomaly
     month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     monthly_anomaly_fig = go.Figure()
@@ -209,11 +230,35 @@ def monthly_anomaly_fig(value):
         yaxis = dict(showgrid=False),
         xaxis = dict(
             range=[0,11],
-            showgrid=False),
+            showgrid=True),
         legend = dict(bordercolor='#F2F2F2', borderwidth=1, x = 1.02),    
             )
     #figure=monthly_anomaly_fig(full_anomaly)        
     return monthly_anomaly_fig
+
+@app.callback(Output('showdown-scatter', 'figure'),
+                Input('dummy-label', 'value'))
+def showdown_scatter(value):
+    #input: full monthly_anomaly df. output: hardcoded current year vs. reigning champions  
+    month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    monthly_anomaly = full_anomaly
+    showdown_scatter_fig = go.Figure()
+    for i in range(0, len(monthly_anomaly)):
+        line_name = str(monthly_anomaly.iloc[i].name)
+        if line_name in ('2016', '2020', '2021'):
+            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_row(monthly_anomaly.iloc[i]) ))
+    showdown_scatter_fig.update_layout(
+        title="Current Year vs. Standing Record", 
+        title_x=0.5,
+        height=200,
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#F2F2F2",
+        margin=dict(l=10,r=25,b=20,t=40,pad=10),
+        yaxis = dict(showgrid=False),
+        xaxis = dict(
+            range=[0,11],
+            showgrid=False,))
+    return showdown_scatter_fig
 
 @app.callback(Output('live-update-text', 'children'),
               Input('interval-component', 'n_intervals'))
@@ -240,6 +285,7 @@ def get_24hr_change(n):
         except:
             result = 'Unavailable'
         return result
+
 
 
 if __name__ == '__main__':
