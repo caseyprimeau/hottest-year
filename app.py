@@ -70,7 +70,7 @@ app.layout = html.Div(children=[
                 n_intervals=0),
         ], className="seven columns"),
         html.Div(
-            [html.Label('Annual Average Temperature Anomaly', id='dummy-label',style={'textAlign':'center','fontSize':16}), 
+            [html.Label('Annual Temperature Anomaly', id='dummy-label',style={'textAlign':'center','fontSize':16}), 
             dash_table.DataTable(
                 columns=[{"name": "Year", "id":"Year"}, 
                         {"name": "Land-Sea Temperature Index", "id":"No_Smoothing"}],
@@ -78,8 +78,8 @@ app.layout = html.Div(children=[
                 style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'padding-right':10 },                
                 style_as_list_view=True,
                 style_table={
-                    'overflowY': 'scroll',
-                    'height': '250px',
+                    'overflowY':'scroll',
+                    'height':'250px',
                     'fontSize':14,
                     'padding':5},
                 style_cell={'textAlign':'center',         
@@ -119,6 +119,13 @@ app.layout = html.Div(children=[
     ], style={'backgroundColor':'#FFFFFF'}),
     html.Br(),
     html.Div([
+        html.Div([
+            html.H3(['TempLS', html.Img(id='expand-templs', n_clicks=0 )]),
+            dbc.Collapse([
+                dbc.Card(dbc.CardBody(dcc.Markdown(infos.templs, dangerously_allow_html=True))),
+                html.Br()],
+                id='templs-container')
+            ], style={"margin-left": "5px"}),
         html.Div([
         dcc.Dropdown(
             id='templs-dropdown',
@@ -193,6 +200,21 @@ def toggle_nasa(n, is_open):
             return is_open, app.get_asset_url('chevron-up.svg')
     return is_open, app.get_asset_url('chevron-down.svg')
  
+@app.callback(Output('templs-container', 'is_open'),
+            Output('expand-templs', 'src'),
+            Input('expand-templs', 'n_clicks'),
+            State('templs-container','is_open'))
+def toggle_templs(n, is_open):
+    if(n):
+        if (is_open == True):
+            is_open = False
+            return is_open, app.get_asset_url('chevron-down.svg')
+        else:
+            is_open = True
+            return is_open, app.get_asset_url('chevron-up.svg')
+    return is_open, app.get_asset_url('chevron-down.svg')
+
+
 
 @app.callback(Output('live-update-text', 'children'),
               Input('interval-component', 'n_intervals'))
@@ -290,7 +312,7 @@ def monthly_tempLS_fig(value):
     #~Input: TempLS df, dropdown seletion, Output: TempLS plot
     templs_fig = px.scatter(moyhu_data, x="Year", y=value, trendline="lowess")
     templs_fig.update_layout(
-        title="TempLS LOESS Trend: " + value,
+        title="TempLS | " + value,
         title_x=0.5,
         paper_bgcolor="white",
         plot_bgcolor="#F2F2F2",
