@@ -120,7 +120,7 @@ app.layout = html.Div(children=[
     html.Br(),
     html.Div([
         html.Div([
-            html.H3(['TempLS', html.Img(id='expand-templs', n_clicks=0 )]),
+            html.H3(['TempLS ', html.Img(id='expand-templs', n_clicks=0 )]),
             dbc.Collapse([
                 dbc.Card(dbc.CardBody(dcc.Markdown(infos.templs, dangerously_allow_html=True))),
                 html.Br()],
