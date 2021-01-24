@@ -509,3 +509,24 @@ there.
 
 /* Larger than Desktop HD */
 @media (min-width: 1200px) {}
+
+/*Boostrap Components */
+
+.collapse:not(.show) {
+  display: none;
+}
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsing {
+    transition: none;
+  }
+}
+.table {
+  border-collapse: collapse !important;
+}
