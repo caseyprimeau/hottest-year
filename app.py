@@ -186,36 +186,6 @@ def colorize_marker(value):
         return'#FFFFFF'
 
 ### Callbacks
-@app.callback(Output('nasa-container', 'is_open'),
-            Output('expand-nasa', 'src'),
-            Input('expand-nasa', 'n_clicks'),
-            State('nasa-container','is_open'))
-def toggle_nasa(n, is_open):
-    if(n):
-        if (is_open == True):
-            is_open = False
-            return is_open, app.get_asset_url('chevron-down.svg')
-        else:
-            is_open = True
-            return is_open, app.get_asset_url('chevron-up.svg')
-    return is_open, app.get_asset_url('chevron-down.svg')
- 
-@app.callback(Output('templs-container', 'is_open'),
-            Output('expand-templs', 'src'),
-            Input('expand-templs', 'n_clicks'),
-            State('templs-container','is_open'))
-def toggle_templs(n, is_open):
-    if(n):
-        if (is_open == True):
-            is_open = False
-            return is_open, app.get_asset_url('chevron-down.svg')
-        else:
-            is_open = True
-            return is_open, app.get_asset_url('chevron-up.svg')
-    return is_open, app.get_asset_url('chevron-down.svg')
-
-
-
 @app.callback(Output('live-update-text', 'children'),
               Input('interval-component', 'n_intervals'))
 def get_market_data(n):
@@ -243,6 +213,19 @@ def get_24hr_change(n):
             result = 'Unavailable'
         return result
 
+@app.callback(Output('nasa-container', 'is_open'),
+            Output('expand-nasa', 'src'),
+            Input('expand-nasa', 'n_clicks'),
+            State('nasa-container','is_open'))
+def toggle_nasa_info(n, is_open):
+    if(n):
+        if (is_open == True):
+            is_open = False
+            return is_open, app.get_asset_url('chevron-down.svg')
+        else:
+            is_open = True
+            return is_open, app.get_asset_url('chevron-up.svg')
+    return not is_open, app.get_asset_url('chevron-up.svg')
 
 @app.callback(Output('showdown-scatter', 'figure'),
                 Input('dummy-label', 'value'))
@@ -305,6 +288,19 @@ def monthly_anomaly_fig(value):
             )   
     return monthly_anomaly_fig
 
+@app.callback(Output('templs-container', 'is_open'),
+            Output('expand-templs', 'src'),
+            Input('expand-templs', 'n_clicks'),
+            State('templs-container','is_open'))
+def toggle_templs_info(n, is_open):
+    if(n):
+        if (is_open == True):
+            is_open = False
+            return is_open, app.get_asset_url('chevron-down.svg')
+        else:
+            is_open = True
+            return is_open, app.get_asset_url('chevron-up.svg')
+    return not is_open, app.get_asset_url('chevron-up.svg')
 
 @app.callback(Output('templs-plot', 'figure'),
                 Input('templs-dropdown', 'value'))
@@ -316,6 +312,7 @@ def monthly_tempLS_fig(value):
         title_x=0.5,
         paper_bgcolor="white",
         plot_bgcolor="#F2F2F2",
+        
         margin=dict(l=10,r=20,b=30,pad=10),
         xaxis_title="",
         yaxis_title="",
