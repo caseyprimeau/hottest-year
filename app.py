@@ -8,8 +8,7 @@ Official yearly measurement:
 https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt
 """
 
-import pdb
-
+#import pdb
 import requests
 import datetime
 from datetime import date
@@ -72,24 +71,29 @@ app.layout = html.Div(children=[
         html.Div(
             [html.Label('Annual Temperature Anomaly', id='dummy-label',style={'textAlign':'center','fontSize':16}), 
             dash_table.DataTable(
-                columns=[{"name": "Year", "id":"Year"}, 
-                        {"name": "Land-Sea Temperature Index", "id":"No_Smoothing"}],
+                columns=[{"name": "Rank", "id":"Rank"}, 
+                        {"name": "Year", "id":"Year"}, 
+                        {"name": "Temperature Index", "id":"No_Smoothing"}],
                 data=yearly_landocean.to_dict('records'),
                 style_header={'backgroundColor': 'rgb(30, 30, 30)', 'color': 'white', 'padding-right':10 },                
                 style_as_list_view=True,
                 style_table={
                     'overflowY':'scroll',
-                    'height':'250px',
-                    'fontSize':14,
+                    'height':'150px',
+                    'fontSize':16,
                     'padding':5},
                 style_cell={'textAlign':'center',         
                             'backgroundColor': '#F2F2F2',
                             'color': 'black'},
                 style_cell_conditional=[
-                {'if': {'id': 'Year'},
+                {'if': { 'filter_query': '{Rank} = 1'},
+                'color': 'red'},
+                {'if': {'id': 'Rank'},
                 'width': '50%'},
+                {'if': {'id': 'Year'},
+                'width': '40%'},
                 {'if': {'id': 'No_Smoothing'},
-                'width': '50%'}]
+                'width': '10%'}]
             )],style={'backgroundColor':'#FFFFFF','padding-left':15,'padding-right':15, 'padding-top': 0, 'padding-bottom':'10px', 'marginLeft': '10px', 'marginRight': '10px', 'marginTop': '20px'}
             ,className="five columns")
     ], className="row"),
@@ -149,11 +153,14 @@ app.layout = html.Div(children=[
             style={'textAlign':'center','fontSize':16}),
         ]),
     html.Br(),
+    html.P('This is not investment advice.'),
+    html.Footer(html.P(dcc.Link('Casey Primeau', target="_blank", href="https://caseyprimeau.com/")),
+    style={'textAlign': 'right', 'backgroundColor':'#e6e6e6'})
 ###end of dash layout
 ])
+#======================================
 
-### Functions
-def colorize_row(row):
+def colorize_line(row):
     #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
     if row.name in(2021, 2020):
         return '#800080'
@@ -237,7 +244,7 @@ def showdown_scatter(value):
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
         if line_name in ('2016', '2020', '2021'):
-            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_row(monthly_anomaly.iloc[i]) ))
+            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_line(monthly_anomaly.iloc[i]) ))
     showdown_scatter_fig.update_layout(
         title="Current Year vs. Standing Record", 
         title_x=0.5,
@@ -273,7 +280,7 @@ def monthly_anomaly_fig(value):
             y=monthly_anomaly.loc[each], 
             x=month_list, 
             name=str(monthly_anomaly.loc[each].name), 
-            line_color=colorize_row(monthly_anomaly.loc[each]),
+            line_color=colorize_line(monthly_anomaly.loc[each]),
             marker_symbol='line-ns'            
             ))
     monthly_anomaly_fig.update_layout(
@@ -313,7 +320,7 @@ def monthly_tempLS_fig(value):
         paper_bgcolor="white",
         plot_bgcolor="#F2F2F2",
         
-        margin=dict(l=10,r=20,b=30,pad=10),
+        margin=dict(l=0,r=20,b=30,pad=0),
         xaxis_title="",
         yaxis_title="",
         yaxis = dict(showgrid=False),

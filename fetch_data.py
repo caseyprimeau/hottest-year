@@ -1,9 +1,5 @@
-import pdb
-import datetime
-from datetime import date
-import requests
-import pandas as pd
 from pathlib import Path
+import pandas as pd
 
 home_dir = str(Path.home())
 
@@ -16,7 +12,6 @@ def gistemp_monthly_anomaly():
         df = df[df.columns[:-1]]
     df.to_csv(home_dir + '/data/gistemp_monthly.csv', index=False)
 
-
 def nasa_yearly_landocean(): 
     url = 'https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt'
     df = pd.read_csv(url, sep='\s+', header=2) #remove header
@@ -24,6 +19,10 @@ def nasa_yearly_landocean():
     df = df[df.columns[:-1]] #drop smoothing column
     df = df.reset_index(drop=True)
     df.sort_values(by='No_Smoothing', ascending=False, inplace=True)
+    df['Rank'] = df['No_Smoothing'].rank(method='dense', ascending=False) #rank by temperature, ties handled by duplicate
+    cols = df.columns.tolist() #move rank to first column position
+    cols = cols[-1:] + cols[:-1]
+    df = df[cols]
     df.to_csv(home_dir + '/data/nasa_landocean_yearly.csv', index=False)
 
 def moyhu_monthly():
