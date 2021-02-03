@@ -52,7 +52,7 @@ app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
         html.Div(
-            [html.H2(dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
+            [html.H2(dcc.Link('2020 PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
             title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website."""
             )),
             html.H3(
@@ -226,13 +226,14 @@ def get_24hr_change(n):
             State('nasa-container','is_open'))
 def toggle_nasa_info(n, is_open):
     if(n):
-        if (is_open == True):
+        if (is_open == True) :
             is_open = False
             return is_open, app.get_asset_url('chevron-down.svg')
         else:
             is_open = True
             return is_open, app.get_asset_url('chevron-up.svg')
-    return not is_open, app.get_asset_url('chevron-up.svg')
+    is_open =False
+    return is_open, app.get_asset_url('chevron-down.svg')
 
 @app.callback(Output('showdown-scatter', 'figure'),
                 Input('dummy-label', 'value'))
