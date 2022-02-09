@@ -40,10 +40,6 @@ moyhu_data = pd.read_csv(home_dir + '/data/moyhu_monthly.csv')
 #======================================
 server = flask.Flask('app')
 app = dash.Dash('app', assets_folder='static', server=server)
-#auth = dash_auth.BasicAuth(
-#    app,
-#    secret.VALID_USERNAME_PASSWORD_PAIRS
-#)
 
 app.index_string = secret.analytics_string
 app.title = 'Will this be the hottest year on record?'
@@ -63,6 +59,7 @@ app.layout = html.Div(children=[
                 [html.Div('24 Hour Change:', style={"margin-right": "10px", "margin-left": "0px"}),
                 html.Div(id='24h-update-text')], className="row"
                 ),
+            html.H3("PredictIt did not run this market in 2021, unfortunately")
             dcc.Interval(   #performs refresh action for price 
                 id='interval-component',
                 interval=60*1000,
@@ -116,8 +113,8 @@ app.layout = html.Div(children=[
         dcc.RangeSlider(
             id='year-slider',
             min=1880,
-            max=2020,
-            value=[1900,2020]),
+            max=2022,
+            value=[1900,2022]),
         dcc.Graph(
             id='anomaly-scatter',),
     ], style={'backgroundColor':'#FFFFFF'}),
@@ -162,7 +159,7 @@ app.layout = html.Div(children=[
 
 def colorize_line(row):
     #above .6-red, above .1-orange, above 0-yellow, above -.21- green, below -.21 teal
-    if row.name in(2021, 2020):
+    if row.name in(2020, 2016):
         return '#800080'
     if row.mean() > 0.6:
         return '#FF0000'
@@ -243,7 +240,7 @@ def showdown_scatter(value):
     showdown_scatter_fig = go.Figure()
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
-        if line_name in ('2016', '2020', '2021'):
+        if line_name in ('2016', '2020', '2022'):
             showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_line(monthly_anomaly.iloc[i]) ))
     showdown_scatter_fig.update_layout(
         title="Current Year vs. Standing Record", 
