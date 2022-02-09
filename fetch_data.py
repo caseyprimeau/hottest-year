@@ -18,8 +18,8 @@ def nasa_yearly_landocean():
     df = df.drop([0,1,3]) #remove formatting rows
     df = df[df.columns[:-1]] #drop smoothing column
     df = df.reset_index(drop=True)
-    df.sort_values(by='No_Smoothing', ascending=False, inplace=True)
-    df['Rank'] = df['No_Smoothing'].rank(method='dense', ascending=False) #rank by temperature, ties handled by duplicate
+    df.sort_values(by='No_Smoothing', ascending=False, inplace=True) #sort by temperature
+    df['Rank'] = df['No_Smoothing'].rank(method='dense', ascending=False) #add rank by temperature, ties handled by duplicate
     cols = df.columns.tolist() #move rank to first column position
     cols = cols[-1:] + cols[:-1]
     df = df[cols]

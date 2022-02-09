@@ -8,7 +8,6 @@ Official yearly measurement:
 https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt
 """
 
-#import pdb
 import requests
 import datetime
 from datetime import date
@@ -48,7 +47,7 @@ app.layout = html.Div(children=[
     html.H1('Will this be the hottest year on record?'),
     html.Div([
         html.Div(
-            [html.H2(dcc.Link('PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
+            [html.H2(dcc.Link('2020 PredictIt Market', target="_blank", href="https://www.predictit.org/markets/detail/6234/Will-NASA-find-2020%E2%80%99s-global-average-temperature-highest-on-record",
             title="""The global temperature Annual Average Anomaly for 2020 shall be greater than that for all prior recorded and published years, as rounded to the nearest hundredth of a degree, according to the first-published such data on NASA's Global Climate Change website."""
             )),
             html.H3(
@@ -223,13 +222,14 @@ def get_24hr_change(n):
             State('nasa-container','is_open'))
 def toggle_nasa_info(n, is_open):
     if(n):
-        if (is_open == True):
+        if (is_open == True) :
             is_open = False
             return is_open, app.get_asset_url('chevron-down.svg')
         else:
             is_open = True
             return is_open, app.get_asset_url('chevron-up.svg')
-    return not is_open, app.get_asset_url('chevron-up.svg')
+    is_open =False
+    return is_open, app.get_asset_url('chevron-down.svg')
 
 @app.callback(Output('showdown-scatter', 'figure'),
                 Input('dummy-label', 'value'))
@@ -240,8 +240,11 @@ def showdown_scatter(value):
     showdown_scatter_fig = go.Figure()
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
-        if line_name in ('2016', '2020', '2022'):
+        if line_name in ('2016', '2020'):
             showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_line(monthly_anomaly.iloc[i]) ))
+        if (line_name =='2022'):
+            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='circle-open-dot', line_color="#000000"))#colorize_line(monthly_anomaly.iloc[i]) ))
+
     showdown_scatter_fig.update_layout(
         title="Current Year vs. Standing Record", 
         title_x=0.5,
