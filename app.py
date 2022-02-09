@@ -83,7 +83,7 @@ app.layout = html.Div(children=[
                             'color': 'black'},
                 style_cell_conditional=[
                 {'if': { 'filter_query': '{Rank} = 1'},
-                'color': 'red'},
+                'color': 'purple'},
                 {'if': {'id': 'Rank'},
                 'width': '50%'},
                 {'if': {'id': 'Year'},
@@ -243,7 +243,7 @@ def showdown_scatter(value):
         if (line_name in('2016', '2020')):
             showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_line(monthly_anomaly.iloc[i]) ))
         if (line_name =='2022' ):
-            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='circle-open-dot', line_color="#000000"))#colorize_line(monthly_anomaly.iloc[i]) ))
+            showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='circle-open-dot', line_color="#FF0000"))#colorize_line(monthly_anomaly.iloc[i]) ))
 
     showdown_scatter_fig.update_layout(
         title="Current Year vs. Standing Record", 
