@@ -112,8 +112,8 @@ app.layout = html.Div(children=[
         dcc.RangeSlider(
             id='year-slider',
             min=1880,
-            max=2022,
-            value=[1900,2022]),
+            max=2021,
+            value=[1900,2021]),
         dcc.Graph(
             id='anomaly-scatter',),
     ], style={'backgroundColor':'#FFFFFF'}),
@@ -240,9 +240,9 @@ def showdown_scatter(value):
     showdown_scatter_fig = go.Figure()
     for i in range(0, len(monthly_anomaly)):
         line_name = str(monthly_anomaly.iloc[i].name)
-        if line_name in ('2016', '2020'):
+        if line_name in ('2022'):
             showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='line-ns', line_color=colorize_line(monthly_anomaly.iloc[i]) ))
-        if (line_name =='2022'):
+        if (line_name =='2016', '2020'):
             showdown_scatter_fig.add_trace(go.Scatter(y=monthly_anomaly.iloc[i], x=month_list, name=line_name, marker_symbol='circle-open-dot', line_color="#000000"))#colorize_line(monthly_anomaly.iloc[i]) ))
 
     showdown_scatter_fig.update_layout(
