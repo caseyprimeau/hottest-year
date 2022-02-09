@@ -58,7 +58,7 @@ app.layout = html.Div(children=[
                 [html.Div('24 Hour Change:', style={"margin-right": "10px", "margin-left": "0px"}),
                 html.Div(id='24h-update-text')], className="row"
                 ),
-            html.H3("PredictIt did not run this market in 2021, unfortunately")
+            html.H3("PredictIt did not run this market in 2021, unfortunately"),
             dcc.Interval(   #performs refresh action for price 
                 id='interval-component',
                 interval=60*1000,
